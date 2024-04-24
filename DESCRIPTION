@@ -4,11 +4,10 @@ Version: 0.1.0
 Authors: Sravya Yarlagadda, Hasan Md Moonam, Aman Arya, Eric Seeram
 Description: If given a response variable y and matrix of candidate
 predictor/independent variables X (y can be continuous or binary, 
-X can be combination of continuous, discrete, binary predictors).
-Package implements following models - linear or logistic, ridge, lasso, elastic net, svm.
-If number of predictors are more than ample size, package pre-screens for top K 
-most informative predictors. Package also does bagging for these models. Package 
-also gives the option for ensemble learning with the models.
+X can be combination of continuous, discrete, binary predictors), 
+implements following models - linear or logistic, ridge, lasso, elastic net, svm.
+If number of predictors are more than sample size, pre-screening for top K 
+most informative predictors. Bagging and option for ensemble learning with the models.
 License: 
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
