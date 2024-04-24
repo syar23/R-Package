@@ -2,12 +2,17 @@ Package: simpleEnsembleGroup22
 Title: Ensemble Learning with Regression Models
 Version: 0.1.0
 Authors: Sravya Yarlagadda, Hasan Md Moonam, Aman Arya, Eric Seeram
+Maintainer:
 Description: If given a response variable y and matrix of candidate
 predictor/independent variables X (y can be continuous or binary, 
 X can be combination of continuous, discrete, binary predictors), 
 implements following models - linear or logistic, ridge, lasso, elastic net, svm.
 If number of predictors are more than sample size, pre-screening for top K 
 most informative predictors. Bagging and option for ensemble learning with the models.
+Depends:
+Imports:
+  glmnet
+Suggests:
 License: 
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
