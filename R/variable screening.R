@@ -9,11 +9,11 @@ variable_pre_screening <- function(X, y, threshold = 0.05) {
       if (p_value <= threshold) {
         selected_columns <- c(selected_columns, i)
       }
-      return(selected_columns)
     }
-    return(X)
-  }
+    return(selected_columns)
 
+  }
+    return(X)
 }
 
 pScore <- function(x, y) {
