@@ -1,30 +1,12 @@
-
-variable_pre_screening <- function(X, y, threshold = 0.05) {
-
-  if (length(y) < 20 * ncol(X)) {
-    # Initialize vector to store selected variables
-    selected_columns <- integer(0)
-    for(x in 1:ncol(X)) {
-      pValue <-pScore(x, y)
-      if (p_value <= threshold) {
-        selected_columns <- c(selected_columns, i)
-      }
-    }
-    return(selected_columns)
-
-  }
-    return(X)
-}
-
 pScore <- function(x, y) {
-  if ((is.factor(y) | is.character(y)) && (is.factor(x) | is.character(X))) {
+  if ((is.factor(y) | is.character(y)) && (is.factor(x) | is.character(x))) {
     # If both x and y are categorical
     contingency_table <- table(x, y)
     out <- chisq.test(contingency_table)$p.value
   } else if ((is.factor(y) | is.character(y)) && is.numeric(x)) {
     # If x is numeric and y is categorical
     numx <- length(unique(x))
-
+    
     if (numx > 2) {
       # With many values in x, compute a t-test
       out <- t.test(x ~ y)$p.value
@@ -47,9 +29,27 @@ pScore <- function(x, y) {
   } else {
     stop("Unsupported data types for 'x' and 'y'.")
   }
-
+  
   return(out)
 }
-
-
+variable_pre_screening <- function(X, y, threshold = 0.05, K = NULL) {
+  
+  if (length(y) < 20 * ncol(X)) {
+    selected_columns <- list()
+    for(x in 1:ncol(X)) {
+      pValue <- pScore(X[, x], y)
+      selected_columns[[x]] <- list(column_index = x, p_value = pValue)
+    }
+    
+    selected_columns <- sort(selected_columns, 
+                             decreasing = FALSE, 
+                             by = function(x) x$p_value)
+    if (!is.null(K)) {
+      selected_columns <- selected_columns[1:K]
+    }
+    return(unlist(lapply(selected_columns, function(x) x$column_index)))
+  }
+  
+  return(X)
+}
 
