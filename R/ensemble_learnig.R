@@ -22,8 +22,8 @@ ensemble_predict <- function(x, y, data, weights = NULL) {
   if (!requireNamespace("glmnet", quietly = TRUE)) stop("Please install the 'glmnet' package.")
   
   # Check input types
-  if (!is.matrix(x) || !is.data.frame(x)) stop("x must be a matrix or data frame.")
-  if (!is.vector(y) || is.matrix(y)) stop("y must be a vector.")
+  if (!is.matrix(x) && !is.data.frame(x)) stop("x must be a matrix or data frame.")
+  if (!is.vector(y) && is.matrix(y)) stop("y must be a vector.")
   
   # Prepare response type check for GLM
   is_binary <- length(unique(y)) == 2
