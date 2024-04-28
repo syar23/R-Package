@@ -40,4 +40,11 @@ bagged.model <- function(X, y, r.bagging, mtype){
 }
 
 
-
+#implementation
+df <- data.matrix(cats)
+colnames(df) <- c("y", sprintf("x%d", 1:(ncol(df)-1)))
+X <- df[,2:3]
+y <- df[,1]
+y[y==2] <- 0
+y_pred <- bagged.model(X,y,10,"elastic.net")
+y_pred
