@@ -13,6 +13,6 @@ ridge_model <- function(X, y) {
 
   best_model <- glmnet::glmnet(as.matrix(X), y, alpha = 0, lambda = best_lambda)
 
-  return (coef(best_model))
+  return (best_model)
 
 }
