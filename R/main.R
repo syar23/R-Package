@@ -1,17 +1,45 @@
-# DOES DISCRETE VARIABLE AFFECT THE MODEL DEVELOPMENT??
+# function to get the model outputs
+my.models <- function(X, y, model.type, r.bagging, is.ensemble){
+  # Create an empty list
+  results <- list()
+  
+  for (mtype in model.type) {
+    if(r.bagging > 1){
+      source("bagging.R")
+      result <- bagged.model(X, y, y_binary, r.bagging, model.type)
+    } else {
+      # load the appropriate source file
+      file.name <- paste0(mtype,".R")
+      source(file.name)
+      # call the appropriate model
+      if(mtype="linear")
+        result <- main.linear(X, y, y_binary)
+      
+      if(mtype="ridge")
+        result <- main.ridge(X, y, y_binary)
+      
+      if(mtype="lasso")
+        result <- main.lasso(X, y, y_binary)
+      
+      if(mtype="elastic.net")
+        result <- main.elastic.net(X, y, y_binary)
+      
+      if(mtype="random.forest")
+        result <- main.random.forest(X, y, y_binary)
+    }
+    
+    results[[mtype]] <- result
+  }
+  
+  if(is.ensemble){
+    source("ensemble.learning.R")
+    results[["ensembled"]] <- main.ensemble.learning(X, y, y_binary)
+  }
+  
+  return(results)
+}
 
-# @params
-# is.ensemble = False
-# is.bagging = 50
-# k = p/2
-# -- y can't be categorical, only binary or continuous y is allowed -- Variable screening
-#   
-#   
-#   check r.bagging value once.
-#   check if k value works
-#   
-
-
+# function to check if the provided predictors are good or not.
 is.good.predictor <- function(x){
   if(is.numeric(x)){
     return(TRUE)
@@ -23,14 +51,10 @@ is.good.predictor <- function(x){
       return(FALSE)
   }
 }
-#Q1: Is ensemble only ML & ENet or else?
-#Q2. model type - multiple or single at once?
-#Q3: is it sufficient to show only the coefficient of the explanatory variables or we need more?
-#Q4. Are we impute missing value or ignore them?
-#Q5: 
 
 
-simpleEnsembleGroup22 <- function(X, y, model.type = c("elastic net", "random forest") ,k = ncol(X)/2, r.bagging = 50, is.ensemble = FALSE){ #method.ensemble = c("")
+#model.type = c("linear", "ridge", "lasso", "elastic.net", "random.forest") 
+simpleEnsembleGroup22 <- function(X, y, model.type = c("elastic.net", "random.forest"), k = ncol(X)/2, r.bagging = 50, is.ensemble = FALSE){
   #Pre-screening to check if provided data is valid
   if(is.null(X) || is.null(y)){
     return("Either X and/or y is NULL")
@@ -48,8 +72,9 @@ simpleEnsembleGroup22 <- function(X, y, model.type = c("elastic net", "random fo
     return("The predictor variable must be numeric: binary, discrete, or continuous.")
   
   #variable pre-screening
+  source("variable screening.R")
   X <- variable_pre_screening(X, y, k)
-  
+  return(my.models(X, y, model.type, r.bagging, is.ensemble))
 }
 
 
