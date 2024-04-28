@@ -1,36 +1,43 @@
-bagging.model <- function(X, y, model.type, r.bagging, y_binary){
+bagged.model <- function(X, y, r.bagging, mtype){
   #frame a dataset
-  o_df = data.frame(y,X)
-  model_coeff <- matrix(1,nrow = r.bagging, ncol = ncol(o_df))
+  df.original = data.frame(y,X)
+  y.hats <- matrix(1, nrow = nrow(df.original), ncol = r.bagging)
   for (i in 1:r.bagging) {
-    #sampling from the original dataset
-    df <- o_df[sample(1:nrow(o_df), replace = TRUE),]
-    #calling the appropriate model
-    if(model.type = "linear" && y_binary){
-      model_coeff[i,] <- my.glm(df)
-    } else if(model.type = "ridge"){
-      model_coeff[i,] <- my.ridge(df)
-    } else if(model.type = "lasso"){
-      model_coeff[i,] <- my.lasso(df)
-    } else if(model.type ="elastic.net"){
-      model_coeff[i,] <- my.elasticNet(df)
-    } else{
-      model_coeff[i,] <- my.lm(df)
-    }
+    # sampling from the original data set
+    df_temp <- df.original[sample(1:nrow(df.original), replace = TRUE),]
+    
+    # load the appropriate source file
+    file.name <- paste0(mtype,".R")
+    source(file.name)
+    # call the appropriate model
+    if(mtype=="linear")
+      fit <- main.linear(X, y)
+    else if(mtype=="ridge")
+      fit <- ridge_model(X, y)
+    else if(mtype=="lasso")
+      fit <- lasso_model(X, y)
+    else if(mtype=="elastic.net")
+      fit <- elastic_net_regression(X, y)
+    else if(mtype=="random.forest")
+      fit <- rf_model(X, y)
+    
+    if(mtype=="linear")
+      X <- data.frame(X)
+    if(mtype=="ridge" || mtype=="lasso")
+      X <- as.matrix(X)
+      
+    y.hats[,i] <- predict.glm(fit,X)
   }
   
   majority <- function(x){
-    max(as.numeric(names(which.max(table(x))))) # needs update
+    max(as.numeric(names(which.max(table(x)))))
   }
   
-  if(y_binary){
-    #majority vote for binary response variable
-    model <- apply(model_coeff, 2, majority) 
-  } else {
-    #simple mean
-    model <- apply(model_coeff, 2, mean)
-  }
-  names(model)<- c("(Intercept)", sprintf("x%d", 1:(ncol(o_df)-1)))
-  
-  return(model)
+  if(is.factor(y))
+    return(apply(y.hats, 1, majority)) # majority vote for binary response variable
+  else
+    return(apply(y.hats, 1, mean)) # simple mean
 }
+
+
+
