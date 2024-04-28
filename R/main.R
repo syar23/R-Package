@@ -6,26 +6,26 @@ my.models <- function(X, y, model.type, r.bagging, is.ensemble){
   for (mtype in model.type) {
     if(r.bagging > 1){
       source("bagging.R")
-      result <- bagged.model(X, y, y_binary, r.bagging, model.type)
+      result <- bagged.model(X, y, r.bagging, model.type)
     } else {
       # load the appropriate source file
       file.name <- paste0(mtype,".R")
       source(file.name)
       # call the appropriate model
       if(mtype="linear")
-        result <- main.linear(X, y, y_binary)
+        result <- main.linear(X, y)
       
       if(mtype="ridge")
-        result <- main.ridge(X, y, y_binary)
+        result <- main.ridge(X, y)
       
       if(mtype="lasso")
-        result <- main.lasso(X, y, y_binary)
+        result <- main.lasso(X, y)
       
       if(mtype="elastic.net")
-        result <- main.elastic.net(X, y, y_binary)
+        result <- main.elastic.net(X, y)
       
       if(mtype="random.forest")
-        result <- main.random.forest(X, y, y_binary)
+        result <- main.random.forest(X, y)
     }
     
     results[[mtype]] <- result
@@ -33,7 +33,7 @@ my.models <- function(X, y, model.type, r.bagging, is.ensemble){
   
   if(is.ensemble){
     source("ensemble.learning.R")
-    results[["ensembled"]] <- main.ensemble.learning(X, y, y_binary)
+    results[["ensembled"]] <- main.ensemble.learning(X, y)
   }
   
   return(results)
@@ -60,10 +60,8 @@ simpleEnsembleGroup22 <- function(X, y, model.type = c("elastic.net", "random.fo
     return("Either X and/or y is NULL")
   }
   # y either binary or continuous -- if cont. it is assumed to be normally dist. 
-  y_binary <- FALSE
-  if(is.factor(y) && length(unique(y))==2)
-    y_binary <- TRUE
-  else if (!is.numeric(y))
+  
+  if (!is.numeric(y) || (is.factor(y) && length(unique(y))>2) )
     return("The response varibale must be numeric: either binary or continuous!")
   
   # Identify if all column's data types are acceptable: X can be continuous, discrete, binary
