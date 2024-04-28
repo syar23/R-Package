@@ -15,16 +15,14 @@
 #' y <- {}
 #' model <- elastic_net_regression(X, y, method = 'glmnet', K = 10)
 #' @export
-elastic_net_regression <- function(X, y, alphas = NULL, lambdas = NULL, method = "glmnet", K = NULL, ...) {
-  require(glmnet)
-  
-  if (is.null(alphas)) {
-    alphas <- seq(0, 1, by = 0.05)
-  }
-  
+elastic_net_regression <- function(X, y) {
+
+  alphas <- seq(0, 1, by = 0.05)
+  print("Performing elastic net regression - ")
+
   min_mse <- Inf
   selected_alpha <- NULL
-  
+
   for (alpha in alphas) {
     # Fit elastic net regression model
     if (!is.null(K)) {
@@ -32,27 +30,27 @@ elastic_net_regression <- function(X, y, alphas = NULL, lambdas = NULL, method =
     } else {
       fit <- elastic_net_regression_helper(X, y, alpha = alpha, method = method, ...)
     }
-    
+
     # Make predictions
     predictions <- predict(fit, newx = X)
-    
+
     # Calculate MSE
     mse <- mean((predictions - y)^2)
-    
+
     # Update selected alpha if MSE is lower
     if (mse < min_mse) {
       min_mse <- mse
       selected_alpha <- alpha
     }
   }
-  
+
   # Final fit with selected alpha
   if (!is.null(K)) {
     final_fit <- elastic_net_regression_helper(X, y, alpha = selected_alpha, method = method, K = K, ...)
   } else {
     final_fit <- elastic_net_regression_helper(X, y, alpha = selected_alpha, method = method, ...)
   }
-  
+
   return(final_fit)
 }
 
@@ -63,10 +61,10 @@ elastic_net_regression_helper <- function(X, y, alpha, method, K, ...) {
       y <- as.numeric(y) - 1
     }
     # Fit elastic net regression model
-    fit <- glmnet(X, y, alpha = alpha, ...)
+    fit <- glmnet::glmnet(X, y, alpha = alpha, ...)
   } else {
     stop("Invalid method. Supported methods are 'glmnet'")
   }
-  
+
   return(fit)
 }
