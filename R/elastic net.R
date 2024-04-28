@@ -17,6 +17,7 @@
 elastic_net_regression <- function(X, y, alphas, method = "glmnet", ...) {
 
   print("Performing elastic net regression - ")
+  alphas <- seq(0, 1, by = 0.05)
 
   min_mse <- Inf
   selected_alpha <- NULL
