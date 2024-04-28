@@ -16,65 +16,59 @@
 #' @importFrom glmnet glmnet
 #' @export
 #' @examples
-#' data(iris)
-#' preds <- ensemble_predict(x = iris[,1:4], y = iris$Species, data = iris)
-ensemble_predict <- function(x, y, data, weights = NULL) {
-  # Load required libraries
-  if (!requireNamespace("randomForest", quietly = TRUE)) stop("Please install the 'randomForest' package.")
-  if (!requireNamespace("glmnet", quietly = TRUE)) stop("Please install the 'glmnet' package.")
-  
-  # Prepare data
-  x <- as.matrix(data[, names(data) %in% names(x)])
-  y <- data[, names(data) %in% names(y)]
-  
-  # Check input types
-  if (!is.matrix(x) && !is.data.frame(x)) stop("x must be a matrix or data frame.")
-  if (!is.vector(y) || is.matrix(y)) stop("y must be a vector.")
-  
-  # Prepare response type for GLM
-  is_binary <- length(unique(y)) == 2
-  response_type <- if (is_binary) "binomial" else "gaussian"
+
+if (!requireNamespace("randomForest", quietly = TRUE)) {
+  install.packages("randomForest")
+}
+if (!requireNamespace("glmnet", quietly = TRUE)) {
+  install.packages("glmnet")
+}
+if (!requireNamespace("MASS", quietly = TRUE)) {
+  install.packages("MASS")
+}
+
+library(randomForest)
+library(glmnet)
+library(MASS)
+
+# Ensemble prediction function definition
+ensemble_predict <- function(x, y, weights = NULL) {
+  # Combine x and y into a single data frame
+  data <- data.frame(x, y = y)
   
   # Split data into training and testing sets
   set.seed(123)  # for reproducibility
   train_idx <- sample(1:nrow(data), size = floor(0.7 * nrow(data)))
   test_idx <- setdiff(1:nrow(data), train_idx)
-  x_train <- data[train_idx, -which(names(data) == names(y))]
-  y_train <- data[train_idx, which(names(data) == names(y))]
-  x_test <- data[test_idx, -which(names(data) == names(y))]
-  y_test <- data[test_idx, which(names(data) == names(y))]
+  x_train <- as.matrix(data[train_idx, -ncol(data)])
+  y_train <- data[train_idx, ncol(data)]
+  x_test <- as.matrix(data[test_idx, -ncol(data)])
   
   # Models setup
   models <- list(
-    "RandomForest" = randomForest::randomForest(x_train, y_train, ntree = 100),
-    "ElasticNet" = glmnet::cv.glmnet(x_train, y_train, family = response_type)
+    "RandomForest" = randomForest(x_train, y_train, ntree = 100),
+    "ElasticNet" = glmnet::cv.glmnet(x_train, y_train, family = "gaussian")
   )
   
-  # Collect predictions and accuracies
-  predictions <- list()
-  accuracies <- list()
-  for (name in names(models)) {
-    model <- models[[name]]
+  # Collect predictions
+  predictions <- lapply(models, function(model) {
     if (inherits(model, "randomForest")) {
-      preds <- predict(model, newdata = x_test)
+      predict(model, x_test)  # Using the generic predict function
     } else {
-      preds <- predict(model, newx = x_test, s = "lambda.min", type = "response")
+      predict(model, x_test, s = "lambda.min", type = "response")
     }
-    predictions[[name]] <- preds
-    accuracies[[name]] <- mean((preds - y_test)^2)  # Mean Squared Error for simplicity
-  }
+  })
   
   # Combine predictions
-  combined_predictions <- do.call("cbind", predictions)
+  combined_predictions <- do.call(cbind, predictions)
   
-  # Final ensemble predictions
+  # Apply weights
   if (is.null(weights)) {
     final_predictions <- rowMeans(combined_predictions)
   } else {
     if (length(weights) != length(predictions)) stop("Length of weights must match the number of models.")
     final_predictions <- rowSums(combined_predictions * weights) / sum(weights)
   }
-  ensemble_accuracy <- mean((final_predictions - y_test)^2)  # Mean Squared Error
   
-  return(list(predictions = final_predictions, accuracies = c(accuracies, Ensemble = ensemble_accuracy)))
+  return(final_predictions)
 }
