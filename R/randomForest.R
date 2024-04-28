@@ -58,22 +58,22 @@ rf_model <- function(X, y, ntree = 100, mtry = NULL) {
 
 
 
-# Load the Iris dataset
-data(iris)
+# # Load the Iris dataset
+# data(iris)
 
-# Prepare data: predictors and response
-X <- iris[, -5]  # exclude the species column to get predictor variables
-y <- iris$Species  # response variable
+# # Prepare data: predictors and response
+# X <- iris[, -5]  # exclude the species column to get predictor variables
+# y <- iris$Species  # response variable
 
-# Fit the Random Forest model
-# Using default settings, which are quite effective for this dataset
-rf_model <- randomForest(x = X, y = y, ntree = 500, mtry = 2, importance = TRUE)
+# # Fit the Random Forest model
+# # Using default settings, which are quite effective for this dataset
+# rf_model <- randomForest(x = X, y = y, ntree = 500, mtry = 2, importance = TRUE)
 
-# Print the model output to see details about the forest
-print(rf_model)
+# # Print the model output to see details about the forest
+# print(rf_model)
 
-# Check out-of-bag (OOB) error rate to evaluate model performance
-cat("OOB Estimate of Error Rate: ", rf_model$err.rate[nrow(rf_model$err.rate), "OOB"], "\n")
+# # Check out-of-bag (OOB) error rate to evaluate model performance
+# cat("OOB Estimate of Error Rate: ", rf_model$err.rate[nrow(rf_model$err.rate), "OOB"], "\n")
 
-# Plot variable importance
-varImpPlot(rf_model)
+# # Plot variable importance
+# varImpPlot(rf_model)
