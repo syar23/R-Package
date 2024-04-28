@@ -1,8 +1,8 @@
 bagging.model <- function(X, y, model.type, r.bagging, y_binary){
   #frame a dataset
   o_df = data.frame(y,X)
-  model_coeff <- matrix(1,nrow = nR, ncol = ncol(o_df))
-  for (i in 1:nR) {
+  model_coeff <- matrix(1,nrow = r.bagging, ncol = ncol(o_df))
+  for (i in 1:r.bagging) {
     #sampling from the original dataset
     df <- o_df[sample(1:nrow(o_df), replace = TRUE),]
     #calling the appropriate model
