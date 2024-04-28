@@ -1,67 +1,43 @@
-library(glmnet)
-
-# Data Preparation Function
-# prepares the data for Lasso regression by scaling and centering the predictors and identifying the response type.
-prepare_data <- function(X, y) {
-  # check if response variable y is binary or continuous
-  if (!all(y %in% c(0, 1)) && length(unique(y)) > 2) {
-    response_type <- "continuous"
+#' Fit a Lasso regression model using glmnet with cross-validation for lambda selection.
+#'
+#' This function fits a Lasso regression model using the glmnet package with cross-validation to select the optimal lambda value. It automatically detects
+#' the type of response variable (binary or continuous) and adjusts the family parameter in the glmnet function call accordingly.
+#'
+#' @param X Matrix of predictor variables. Each row represents an observation, and each column represents a predictor.
+#' @param y Response variable. For binary outcomes, it should be a binary vector (0 or 1). For continuous outcomes, it should be a numeric vector.
+#' @param fold_percentage Ratio of number of folds to sample size for cross-validation.
+#' 
+#' @return A fitted Lasso regression model object of class "glmnet".
+#' 
+#' @examples
+#' # Example usage
+#' X <- matrix(rnorm(100 * 5), ncol = 5)
+#' y <- sample(0:1, 100, replace = TRUE)
+#' lasso_model(X, y, fold_percentage = 0.2)
+#'
+#' @import glmnet
+#' @export
+lasso_model <- function(X, y, fold_percentage = 0.2) {
+  # Determine the type of response variable
+  if (is.factor(y) || all(y %in% c(0, 1))) {
+    family_type <- "binomial"
   } else {
-    response_type <- "binary"
+    family_type <- "gaussian"
   }
-
-  X_scaled <- scale(X)  # scale and center predictors X
-
-  # return a list containing the scaled predictors, response, and response type
-  list(X = X_scaled, y = y, response_type = response_type)
-}
-
-# Lasso Model Fitting Function
-# fit a Lasso regression model using glmnet, automatically adjusting for binary or continuous outcomes.
-fit_lasso_model <- function(X, y, response_type) {
-  # Fit Lasso model using glmnet, switch family based on response type
-  if (response_type == "binary") {
-    model <- glmnet(X, y, family = "binomial")
-  } else {
-    model <- glmnet(X, y, family = "gaussian")
-  }
-
-  # Return the fitted model
+  # Calculate the number of folds based on the fold percentage
+  #nfolds <- max(2, round(1 / fold_percentage))
+  # Calculate the number of folds ensuring each fold has at least 10 observations
+  min_obs_per_fold <- 10
+  nfolds <- max(2, min(floor(nrow(X) / min_obs_per_fold), round(1 / 0.2)))
+  
+  # Perform cross-validation to select the optimal lambda value
+  cv_model <- glmnet::cv.glmnet(X, y, family = family_type, nfolds = nfolds)
+  
+  # Select the lambda value with minimum cross-validated error
+  best_lambda <- cv_model$lambda.min
+  
+  # Fit the final Lasso model with the selected lambda
+  model <- glmnet::glmnet(X, y, family = family_type, lambda = best_lambda)
+  
   return(model)
 }
-
-# Model Validation and Selection
-# Performs cross-validation to select the optimal lambda and evaluate model performance.
-validate_lasso_model <- function(X, y, response_type) {
-  # Perform cross-validation using glmnet
-  if (response_type == "binary") {
-    cv_model <- cv.glmnet(X, y, family = "binomial")
-  } else {
-    cv_model <- cv.glmnet(X, y, family = "gaussian")
-  }
-
-  # Plot the cross-validation curve to visualize performance
-  plot(cv_model)
-
-  # Return the cross-validated model, lambda minimizing the cross-validation error,
-  # and lambda that is within one standard error of the minimum.
-  return(list(model = cv_model, lambda_min = cv_model$lambda.min, lambda_1se = cv_model$lambda.1se))
-}
-
-# Prediction Function
-# Uses a fitted model to make predictions on new data.
-make_predictions <- function(model, new_data, lambda = "lambda.min") {
-  # Predict using the specified lambda (lambda.min or lambda.1se)
-  predictions <- predict(model, new = new_data, s = lambda, type = "response")
-
-  # Return the predictions
-  return(predictions)
-}
-
-# Example Usage
-# -------------------------------
-# Assuming X and y are already defined in your workspace
-# data_list <- prepare_data(X, y)
-# fitted_model <- fit_lasso_model(data_list$X, data_list$y, data_list$response_type)
-# validated_model <- validate_lasso_model(data_list$X, data_list$y, data_list$response_type)
-# predictions <- make_predictions(validated_model$model, new_data = data_list$X)
