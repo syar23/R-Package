@@ -7,17 +7,15 @@
 #' @param alphas Vector of alpha values to try
 #' @param lambdas Regularization parameter
 #' @param method Method for regression ('glmnet')
-#' @param K Number of top predictors to include in the model
 #' @param ... Additional arguments to be passed to the regression method
 #' @return Fitted model object
 #' @examples
 #' X <- {}
 #' y <- {}
-#' model <- elastic_net_regression(X, y, method = 'glmnet', K = 10)
+#' model <- elastic_net_regression(X, y, alphas = seq(0, 1, by = 0.05), method = 'glmnet')
 #' @export
-elastic_net_regression <- function(X, y) {
+elastic_net_regression <- function(X, y, alphas, method = "glmnet", ...) {
 
-  alphas <- seq(0, 1, by = 0.05)
   print("Performing elastic net regression - ")
 
   min_mse <- Inf
@@ -25,11 +23,7 @@ elastic_net_regression <- function(X, y) {
 
   for (alpha in alphas) {
     # Fit elastic net regression model
-    if (!is.null(K)) {
-      fit <- elastic_net_regression_helper(X, y, alpha = alpha, method = method, K = K, ...)
-    } else {
-      fit <- elastic_net_regression_helper(X, y, alpha = alpha, method = method, ...)
-    }
+    fit <- elastic_net_regression_helper(X, y, alpha = alpha, method = method, ...)
 
     # Make predictions
     predictions <- predict(fit, newx = X)
@@ -45,16 +39,12 @@ elastic_net_regression <- function(X, y) {
   }
 
   # Final fit with selected alpha
-  if (!is.null(K)) {
-    final_fit <- elastic_net_regression_helper(X, y, alpha = selected_alpha, method = method, K = K, ...)
-  } else {
-    final_fit <- elastic_net_regression_helper(X, y, alpha = selected_alpha, method = method, ...)
-  }
+  final_fit <- elastic_net_regression_helper(X, y, alpha = selected_alpha, method = method, ...)
 
   return(final_fit)
 }
 
-elastic_net_regression_helper <- function(X, y, alpha, method, K, ...) {
+elastic_net_regression_helper <- function(X, y, alpha, method, ...) {
   if (is.null(method) | method == "glmnet") {
     # If y is binary, convert it to a factor
     if (is.factor(y)) {
