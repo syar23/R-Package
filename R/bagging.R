@@ -4,16 +4,16 @@
 #how to combine these -- simple avg, weighted avg., majority vote (logistic - 0/1 binary) -- describe in document.
 
 
-library(MASS)
+#library(MASS)
 #Data for linear regression
-X <- cement[,1:4]
-y <- cement[,5]
+#X <- cement[,1:4]
+#y <- cement[,5]
 #Data for logistic regression
-df <- data.matrix(cats)
-colnames(df) <- c("y", sprintf("x%d", 1:(ncol(df)-1)))
-X <- df[,2:3]
-y <- df[,1]
-y[y==2] <- 0
+#df <- data.matrix(cats)
+# colnames(df) <- c("y", sprintf("x%d", 1:(ncol(df)-1)))
+# X <- df[,2:3]
+# y <- df[,1]
+# y[y==2] <- 0
 
 
 #linear Model
