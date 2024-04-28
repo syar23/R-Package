@@ -27,10 +27,6 @@ if (!requireNamespace("MASS", quietly = TRUE)) {
   install.packages("MASS")
 }
 
-library(randomForest)
-library(glmnet)
-library(MASS)
-
 # Ensemble prediction function definition
 ensemble_predict <- function(x, y, weights = NULL) {
   # Combine x and y into a single data frame
