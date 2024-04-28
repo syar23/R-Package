@@ -28,7 +28,7 @@
 #'
 #' @import randomForest
 #' @export
-rf_model <- function(X, y, ntree = 100, mtry = NULL) {
+rf_model <- function(X, y, ntree = 500, mtry = NULL) {
   # Ensure X is a matrix or data frame
   if (!is.matrix(X) && !is.data.frame(X)) {
     stop("X should be a matrix or a data frame.")
