@@ -35,7 +35,6 @@ simple_ensemble_group_22 <- function(X, y, models = c("elastic_net", "random_for
   }
 
   #variable pre-screening
-  print("variable screening is being done - ")
   source("variable_screening.R")
   X <- variable_pre_screening(X, y, k)
 
@@ -49,6 +48,7 @@ simple_ensemble_group_22 <- function(X, y, models = c("elastic_net", "random_for
     } else {
       # load the appropriate source file
       print("List of models given - ")
+      print(modeltype)
       file.name <- paste0(modeltype,".R")
       source(file.name)
       print(file.name)
@@ -57,8 +57,8 @@ simple_ensemble_group_22 <- function(X, y, models = c("elastic_net", "random_for
                        linear = linear_model(X, y),
                        ridge = ridge_model(X, y),
                        lasso = lasso_model(X, y),
-                       elastic.net = elastic_net_regression(X, y),
-                       random.forest = rf_model(X, y))
+                       elastic_net = elastic_net_regression(X, y),
+                       random_forest = rf_model(X, y))
     }
 
     results[[modeltype]] <- result
