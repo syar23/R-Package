@@ -20,6 +20,7 @@
 #'
 # Ensemble prediction function definition
 ensemble_predict <- function(x, y, data, weights = NULL) {
+
   # Split data into training and testing sets
   set.seed(123)  # for reproducibility
   train_idx <- sample(1:nrow(data), size = floor(0.7 * nrow(data)))
