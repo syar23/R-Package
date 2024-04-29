@@ -31,11 +31,11 @@ lasso_model <- function(X, y, fold_percentage = 0.2) {
   nfolds <- max(2, min(floor(nrow(X) / min_obs_per_fold), round(1 / fold_percentage)))
 
   # Perform cross-validation to select the optimal lambda value
-  cv_model <- glmnet::cv.glmnet(X, y, family = family_type, nfolds = nfolds)
+  cv_model <- glmnet::cv.glmnet(X, y, alpha = 1, family = family_type, nfolds = nfolds)
 
   # Fit the final Lasso model with the selected lambda
   best_lambda <- cv_model$lambda.min
-  model <- glmnet::glmnet(X, y, family = family_type, lambda = best_lambda)
+  model <- glmnet::glmnet(X, y, alpha = 1, family = family_type, lambda = best_lambda)
 
   return(model)
 }
