@@ -15,11 +15,10 @@
 #' The returned list includes the results of training and evaluating individual models specified in 'models', as well as the ensemble model if 'is.ensemble' is TRUE.
 #'
 #' @export
-#'
 #' @examples
 #' # Example usage:
 #' results <- simpleEnsembleGroup22(X, y, models = c("elastic net", "random.forest"), r.bagging = NULL, is.ensemble = TRUE)
-simpleEnsembleGroup22 <- function(X, y, models = c("elastic net", "random forest"), r.bagging = NULL, is.ensemble = FALSE, k=NULL) {
+simple_ensemble_group_22 <- function(X, y, models = c("elastic_net", "random_forest"), r.bagging = NULL, is.ensemble = FALSE, k=NULL) {
 
   #Pre-screening to check if provided data is valid
   if(is.null(X) || is.null(y)){
@@ -37,8 +36,8 @@ simpleEnsembleGroup22 <- function(X, y, models = c("elastic net", "random forest
 
   #variable pre-screening
   print("variable screening is being done - ")
-  source("variable screening.R")
-  X <- variable_screening(X, y, k)
+  source("variable_screening.R")
+  X <- variable_pre_screening(X, y, k)
 
   results <- list()
 
@@ -46,7 +45,7 @@ simpleEnsembleGroup22 <- function(X, y, models = c("elastic net", "random forest
     if (!is.null(r.bagging)) {
       print("Bagging is being done - ")
       source("bagging.R")
-      result <- bagged.model(X, y, r.bagging, models)
+      result <- bagged_model(X, y, r.bagging, models)
     } else {
       # load the appropriate source file
       print("List of models given - ")
@@ -73,3 +72,4 @@ simpleEnsembleGroup22 <- function(X, y, models = c("elastic net", "random forest
 
   return(results)
 }
+
