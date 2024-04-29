@@ -13,8 +13,8 @@ load_model <- function(X, y, mtype) {
          linear = main.linear(X, y),
          ridge = ridge_model(as.matrix(X), y),
          lasso = lasso_model(as.matrix(X), y),
-         "elastic net" = elastic_net_regression(X, y),
-         "random forest" = rf_model(X, y)
+         "elastic_net" = elastic_net_regression(X, y),
+         "random_forest" = rf_model(X, y)
   )
 }
 
@@ -28,7 +28,7 @@ load_model <- function(X, y, mtype) {
 #' @param y.hats Predicted values.
 #' @return Processed results.
 process_results <- function(fitted, mtype, terms, y.hats) {
-  if (mtype %in% c("lasso", "elastic net", "random forest")) {
+  if (mtype %in% c("lasso", "elastic_net", "random_forest")) {
     naive.mat <- matrix(1, ncol = length(fitted) + 1, nrow = nrow(y.hats))
     for (j in terms)
       naive.mat[j, ] <- 1
@@ -46,7 +46,7 @@ process_results <- function(fitted, mtype, terms, y.hats) {
 #' @param y Dependent variable (response).
 #' @param r.bagging Number of bagging iterations.
 #' @param mtype Type of machine learning model (linear, ridge, lasso, elastic net, random forest).
-#' @return If the response variable is factor, returns a list with fitted values and naive variables; 
+#' @return If the response variable is factor, returns a list with fitted values and naive variables;
 #' otherwise, returns fitted values.
 #' @export
 bagged_model <- function(X, y, r.bagging, mtype) {
@@ -61,7 +61,7 @@ bagged_model <- function(X, y, r.bagging, mtype) {
     # Predict
     y.hats[, i] <- predict(fit, df_temp[, -1])
   }
-  
+
   # Process results
   if (is.factor(y)) {
     process_results(apply(y.hats, 1, function(x) max(as.numeric(names(which.max(table(x)))))), mtype, NULL, y.hats)
