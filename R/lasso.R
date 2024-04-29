@@ -40,8 +40,3 @@ lasso_model <- function(X, y, fold_percentage = 0.2) {
   return(model)
 }
 
-
-# data(cpus)
-# str(cpus)
-# resluts <- lasso_model(cpus[, 2:7], cpus[,8])
-# print(results)
