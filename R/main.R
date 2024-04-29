@@ -50,10 +50,9 @@ simpleEnsembleGroup22 <- function(X, y, models = c("elastic net", "random forest
     } else {
       # load the appropriate source file
       print("List of models given - ")
-      print(modeltype)
       file.name <- paste0(modeltype,".R")
       source(file.name)
-
+      print(file.name)
       # call the appropriate model using switch
       result <- switch(modeltype,
                        linear = linear_model(X, y),
@@ -74,5 +73,3 @@ simpleEnsembleGroup22 <- function(X, y, models = c("elastic net", "random forest
 
   return(results)
 }
-
-
