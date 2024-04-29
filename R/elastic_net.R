@@ -1,3 +1,28 @@
+#' Elastic Net Regression Helper Function
+#'
+#' Fits an elastic net regression model with the specified alpha.
+#'
+#' @param X Matrix of predictors (independent variables), can be a mix of continuous, discrete, and binary predictors
+#' @param y Response variable (binary or continuous)
+#' @param alpha Alpha value for elastic net regularization
+#' @param method Method for regression ('glmnet')
+#' @param ... Additional arguments to be passed to the regression method
+#' @return Fitted model object
+elastic_net_regression_helper <- function(X, y, alpha, method, ...) {
+  if (is.null(method) || method == "glmnet") {
+    # If y is binary, convert it to a factor
+    if (is.factor(y)) {
+      y <- as.numeric(y) - 1
+    }
+    # Fit elastic net regression model
+    fit <- glmnet::glmnet(X, y, alpha = alpha, ...)
+  } else {
+    stop("Invalid method. Supported methods are 'glmnet'")
+  }
+
+  return(fit)
+}
+
 #' Elastic Net Regression with Cross-Validated Alpha Selection
 #'
 #' Fits an elastic net regression model with cross-validated alpha selection.
@@ -5,7 +30,6 @@
 #' @param X Matrix of predictors (independent variables), can be a mix of continuous, discrete, and binary predictors
 #' @param y Response variable (binary or continuous)
 #' @param alphas Vector of alpha values to try
-#' @param lambdas Regularization parameter
 #' @param method Method for regression ('glmnet')
 #' @param ... Additional arguments to be passed to the regression method
 #' @return Fitted model object
@@ -15,9 +39,7 @@
 #' model <- elastic_net_regression(X, y, alphas = seq(0, 1, by = 0.05), method = 'glmnet')
 #' @export
 elastic_net_regression <- function(X, y, alphas, method = "glmnet", ...) {
-
   print("Performing elastic net regression - ")
-  alphas <- seq(0, 1, by = 0.05)
 
   min_mse <- Inf
   selected_alpha <- NULL
@@ -43,19 +65,4 @@ elastic_net_regression <- function(X, y, alphas, method = "glmnet", ...) {
   final_fit <- elastic_net_regression_helper(X, y, alpha = selected_alpha, method = method, ...)
 
   return(final_fit)
-}
-
-elastic_net_regression_helper <- function(X, y, alpha, method, ...) {
-  if (is.null(method) | method == "glmnet") {
-    # If y is binary, convert it to a factor
-    if (is.factor(y)) {
-      y <- as.numeric(y) - 1
-    }
-    # Fit elastic net regression model
-    fit <- glmnet::glmnet(X, y, alpha = alpha, ...)
-  } else {
-    stop("Invalid method. Supported methods are 'glmnet'")
-  }
-
-  return(fit)
 }
