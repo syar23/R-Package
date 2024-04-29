@@ -43,14 +43,13 @@ elastic_net_regression <- function(X, y, alphas, method = "glmnet", ...) {
 
   min_mse <- Inf
   selected_alpha <- NULL
-
+alphas <- seq(0, 1, by = 0.05)
   for (alpha in alphas) {
     # Fit elastic net regression model
     fit <- elastic_net_regression_helper(X, y, alpha = alpha, method = method, ...)
 
     # Make predictions
-    predictions <- predict(fit, newx = X)
-
+    predictions <- predict(fit, as.matrix(X))
     # Calculate MSE
     mse <- mean((predictions - y)^2)
 
