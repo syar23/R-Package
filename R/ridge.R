@@ -6,13 +6,20 @@
 #' @return coefficient matrix of the covariates
 #' @export
 ridge_model <- function(X, y) {
-
+  
+  print("Ridge regression is being done - ")
+  # Determine the type of response variable
+  family_type <- if (all(y %in% c(0, 1))) "binomial" else "gaussian"
+  
   # Perform cross-validation to select the optimal lambda value
-  cv_model <- glmnet::cv.glmnet(as.matrix(X), y, alpha = 0)
-  best_lambda <- cv_model$lambda.min
-
-  best_model <- glmnet::glmnet(as.matrix(X), y, alpha = 0, lambda = best_lambda)
-
-  return (best_model)
-
+  fit <- cv.glmnet(X, y, family = family_type, alpha = 0, nfolds = 10)
+  opt_lambda <- fit$lambda.min
+  
+  # fit the final model
+  fit_final <- glmnet(X, y, alpha = 0, lambda = opt_lambda)
+  
+  return (list(model = fit_final, predicted.value = predict(fit_final, newx = X, type = "response", s = opt_lambda)))
 }
+
+
+

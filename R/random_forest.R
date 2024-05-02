@@ -34,6 +34,12 @@ rf_model <- function(X, y, ntree = 500, mtry = NULL) {
     stop("X should be a matrix or a data frame.")
   }
   
+  print("Random Forest method is being applied - ")
+  
+  # If the response variable is binary, RF model doesn't recognize it unless it's a factored variable
+  # Hence convert y into a factored variable  -- user may use 0, 1 numeric input or a factored variable both are fine.
+  if (all(y %in% c(0, 1))) y <- as.factor(y)
+  
   # Determine the type of response variable
   model_type <- if (is.factor(y)) "classification" else "regression"
   

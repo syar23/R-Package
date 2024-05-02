@@ -17,8 +17,8 @@
 #' @export
 #' @examples
 #' # Example usage:
-#' results <- simpleEnsembleGroup22(X, y, models = c("elastic net", "random.forest"), r.bagging = NULL, is.ensemble = TRUE)
-simple_ensemble_group_22 <- function(X, y, models = c("elastic_net", "random_forest"), r.bagging = NULL, is.ensemble = FALSE, k=NULL) {
+#' results <- simple_ensemble_group_22(X, y, models = c("elastic net", "random.forest"), r.bagging = NULL, is.ensemble = TRUE, k=NULL, var.prescreen = TRUE)
+simple_ensemble_group_22 <- function(X, y, models = c("elastic_net", "random_forest"), r.bagging = NULL, is.ensemble = FALSE, k=NULL, is.prescreen = TRUE) {
 
   #Pre-screening to check if provided data is valid
   if(is.null(X) || is.null(y)){
@@ -33,11 +33,27 @@ simple_ensemble_group_22 <- function(X, y, models = c("elastic_net", "random_for
   if (!all(sapply(X, function(x) is.numeric(x) || (is.factor(x) && length(unique(x)) == 2)))) {
     return("The predictor variable must be numeric: binary, discrete, or continuous.")
   }
+  
+  #check if data supports the model
+  if(!is.prescreen && (models == "linear") && nrow(X) < ncol(X))
+    return("Linear model with all the variables is not supported when sample size is less then the number of predictors")
 
   #variable pre-screening
-  source("variable_screening.R")
-  X <- variable_pre_screening(X, y, k)
-
+  if(is.prescreen){
+    source("variable_screening.R")
+    X <- variable_pre_screening(X, y, k)
+  }
+  
+  # If y is a factored variable, convert it into a binary variable
+  if (is.factor(y)) {
+    y <- as.numeric(y) - 1
+  }
+  # Process X for categorical variable
+  if (!all(sapply(X, function(x) is.numeric(x)))) {
+    df <- data.frame(y, X)
+    X <- model.matrix(y~.,df)[,-1]
+  }
+  
   results <- list()
 
   for (modeltype in models) {
@@ -55,12 +71,11 @@ simple_ensemble_group_22 <- function(X, y, models = c("elastic_net", "random_for
       # call the appropriate model using switch
       result <- switch(modeltype,
                        linear = linear_model(X, y),
-                       ridge = ridge_model(X, y),
-                       lasso = lasso_model(X, y),
-                       elastic_net = elastic_net_regression(X, y),
+                       ridge = ridge_model(as.matrix(X), y),
+                       lasso = lasso_model(as.matrix(X), y),
+                       elastic_net = elastic_net_regression(as.matrix(X), y),
                        random_forest = rf_model(X, y))
     }
-
     results[[modeltype]] <- result
   }
 

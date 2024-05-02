@@ -17,26 +17,19 @@
 #'
 #' @import glmnet
 #' @export
-lasso_model <- function(X, y, fold_percentage = 0.2) {
-  # Ensure X is a matrix
-  if (!is.matrix(X)) {
-    X <- as.matrix(X)
-  }
-
+lasso_model <- function(X, y) {
+  
+  print("Lasso regression is being done - ")
   # Determine the type of response variable
-  family_type <- if (is.factor(y) || all(y %in% c(0, 1))) "binomial" else "gaussian"
-
-  # Calculate the number of folds ensuring each fold has at least a minimum number of observations
-  min_obs_per_fold <- 10
-  nfolds <- max(2, min(floor(nrow(X) / min_obs_per_fold), round(1 / fold_percentage)))
-
+  family_type <- if (all(y %in% c(0, 1))) "binomial" else "gaussian"
+  
   # Perform cross-validation to select the optimal lambda value
-  cv_model <- glmnet::cv.glmnet(X, y,alpha = 1, family = family_type, nfolds = nfolds)
-
-  # Fit the final Lasso model with the selected lambda
-  best_lambda <- cv_model$lambda.min
-  model <- glmnet::glmnet(X, y, alpha = 1,family = family_type, lambda = best_lambda)
-
-  return(model)
+  fit <- cv.glmnet(X, y, family = family_type, alpha = 1, nfolds = 10)
+  opt_lambda <- fit$lambda.min
+  
+  # fit the final model
+  fit_final <- glmnet(X, y, alpha = 1, lambda = opt_lambda)
+  
+  return (list(model = fit_final, predicted.value = predict(fit_final, newx = X, type = "response", s = opt_lambda)))
 }
 

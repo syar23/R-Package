@@ -1,28 +1,3 @@
-#' Elastic Net Regression Helper Function
-#'
-#' Fits an elastic net regression model with the specified alpha.
-#'
-#' @param X Matrix of predictors (independent variables), can be a mix of continuous, discrete, and binary predictors
-#' @param y Response variable (binary or continuous)
-#' @param alpha Alpha value for elastic net regularization
-#' @param method Method for regression ('glmnet')
-#' @param ... Additional arguments to be passed to the regression method
-#' @return Fitted model object
-elastic_net_regression_helper <- function(X, y, alpha, method, ...) {
-  if (is.null(method) || method == "glmnet") {
-    # If y is binary, convert it to a factor
-    if (is.factor(y)) {
-      y <- as.numeric(y) - 1
-    }
-    # Fit elastic net regression model
-    fit <- glmnet::glmnet(X, y, alpha = alpha, ...)
-  } else {
-    stop("Invalid method. Supported methods are 'glmnet'")
-  }
-
-  return(fit)
-}
-
 #' Elastic Net Regression with Cross-Validated Alpha Selection
 #'
 #' Fits an elastic net regression model with cross-validated alpha selection.
@@ -38,30 +13,25 @@ elastic_net_regression_helper <- function(X, y, alpha, method, ...) {
 #' y <- {}
 #' model <- elastic_net_regression(X, y, alphas = seq(0, 1, by = 0.05), method = 'glmnet')
 #' @export
-elastic_net_regression <- function(X, y, alphas, method = "glmnet", ...) {
-  print("Performing elastic net regression - ")
+elastic_net_regression <- function(X, y) {
+  
+  # Determine the type of response variable
+  family_type <- if (all(y %in% c(0, 1))) "binomial" else "gaussian"
 
-  min_mse <- Inf
-  selected_alpha <- NULL
-alphas <- seq(0, 1, by = 0.05)
-  for (alpha in alphas) {
-    # Fit elastic net regression model
-    fit <- elastic_net_regression_helper(X, y, alpha = alpha, method = method, ...)
-
-    # Make predictions
-    predictions <- predict(fit, as.matrix(X))
-    # Calculate MSE
-    mse <- mean((predictions - y)^2)
-
-    # Update selected alpha if MSE is lower
-    if (mse < min_mse) {
-      min_mse <- mse
-      selected_alpha <- alpha
-    }
+  alph_lamb <- data.frame(matrix(ncol=3, nrow=0))
+  alphavec = seq(0,1,0.1)
+  for (i in 1:length(alphavec)){
+    # Fit the elastic net using cross-validation
+    fit <- cv.glmnet(X, y, family = family_type, alpha=alphavec[i], nfolds = 10)
+    
+    min_mse <- min(fit$cvm)
+    lam <- fit$lambda[which(fit$cvm == min_mse)]
+    alph_lamb <- rbind(alph_lamb, c(alphavec[i], lam, min_mse))
   }
-
-  # Final fit with selected alpha
-  final_fit <- elastic_net_regression_helper(X, y, alpha = selected_alpha, method = method, ...)
-
-  return(final_fit)
+  colnames(alph_lamb) <- c("alpha", "lambda", "cvm")
+  min_cvm <- min(alph_lamb$cvm)
+  opt_alpha <- alph_lamb[which(alph_lamb$cvm == min_cvm),1]
+  opt_lambda <- alph_lamb[which(alph_lamb$cvm == min_cvm),2]
+  fit_final <- glmnet(X,y, family = family_type, alpha = opt_alpha, lambda = opt_lambda)
+  return(list(model = fit_final, optimal.alpha = opt_alpha, predicted.value = predict(fit_final, newx = X, type = "response", s = opt_lambda)))
 }
