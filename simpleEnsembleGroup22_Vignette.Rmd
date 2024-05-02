@@ -1,0 +1,152 @@
+
+---
+title: "Vignette for simpleEnsembleGroup22 Package"
+author: "Sravya Yarlagadda, Hassan Moonam, Aman Arya, Eric Seeram"
+date: "`r Sys.Date()`"
+---
+
+## Introduction
+
+This vignette describes the usage and internal workings of the `simpleEnsembleGroup22` package, which includes various machine learning techniques for regression and ensemble learning.
+
+## Importing the Package
+
+To use the `simpleEnsembleGroup22` package, source all component scripts into your R environment.
+
+```{r setup, include=TRUE}
+source("bagging.R")
+source("elastic_net.R")
+source("ensemble.R")
+source("lasso.R")
+source("linear.R")
+source("random_forest.R")
+source("ridge.R")
+source("simpleEnsembleGroup22.R")
+source("variable_screening.R")
+```
+
+## Internal Workings and Mathematics
+
+### 1. Linear Regression (`linear_model`)
+
+**Mathematics**: Linear regression fits a model to minimize the sum of squared residuals.
+
+**Example**:
+
+```{r linear-example}
+library(datasets)
+data(mtcars)
+X <- as.matrix(mtcars[, c("wt", "hp")])
+y <- mtcars$mpg
+linear_results <- linear_model(X, y)
+summary(linear_results)
+```
+
+### 2. Lasso Regression (`lasso_model`)
+
+## Function Description
+
+The `lasso_model` function fits a Lasso regression model using cross-validation to select the best lambda value.
+
+### Parameters
+
+- **X**: Matrix of predictors.
+- **y**: Response variable, binary or continuous.
+
+### Example Usage
+
+```r
+X <- matrix(rnorm(100 * 5), ncol = 5)
+y <- sample(0:1, 100, replace = TRUE)
+result <- lasso_model(X, y)
+print(result$model)
+```
+### 3. Ridge Regression (`ridge_model`)
+
+**Mathematics**: Ridge regression uses L2 regularization.
+
+**Example**:
+
+```{r ridge-example}
+ridge_results <- ridge_model(X, y)
+summary(ridge_results)
+```
+
+### 4. Elastic Net Regression (`elastic_net_regression`)
+
+**Mathematics**: Elastic net combines penalties from lasso and ridge.
+
+**Example**:
+
+```{r elastic-net-example}
+elastic_net_results <- elastic_net_regression(X, y)
+summary(elastic_net_results)
+```
+
+### 5. Random Forest (`rf_model`)
+
+## Function Description
+
+The `rf_model` function is designed for both classification and regression tasks using Random Forest. It optimizes model parameters such as the number of trees and the number of variables to consider at each split.
+
+### Parameters
+
+- **X**: Predictor variables.
+- **y**: Response variable, either factor or numeric.
+- **mtry_values**, **ntree_values**: Optional tuning parameters.
+
+### Example Usage
+
+```r
+data(iris)
+X <- iris[, -5]
+y <- iris[, 5]
+result <- rf_model(X, factor(y))
+print(result$model)
+```
+
+### 6. Bagging (`bagged_model`)
+
+**Mathematics**: Bagging involves training multiple models on bootstrapped samples.
+
+**Example**:
+
+```{r bagging-example}
+bagged_results <- bagged_model(X, y, r.bagging = 10, mtype = "linear")
+print(bagged_results)
+```
+
+### 7. Ensemble Learning (`ensemble_model`)
+
+## Function Description
+
+The `ensemble_predict` function combines predictions from Random Forest and Elastic Net models. It supports weighted averages of predictions if weights are provided.
+
+### Parameters
+
+- **x**, **y**: Predictor and response variables.
+- **data**: The dataset containing predictors and response.
+- **weights**: Optional weights for averaging predictions.
+
+### Example Usage
+
+```r
+data <- data.frame(x = matrix(rnorm(100 * 5), ncol = 5), y = sample(c("yes", "no"), 100, replace = TRUE))
+result <- ensemble_predict(x = data[, -ncol(data)], y = data[, ncol(data)], data = data)
+print(result)
+```
+
+### 8. Variable Screening (`variable_screening`)
+
+**Mathematics**: Selects the most relevant features using statistical tests.
+
+**Example**:
+
+```{r variable-screening-example}
+screened_X <- variable_screening(X, y)
+print(dim(screened_X))  # Shows the reduced number of predictors
+```
+
+## Conclusion
+
+The `simpleEnsembleGroup22` package provides tools for robust machine learning applications, integrating advanced regression and ensemble techniques to tackle complex predictive modeling tasks.
