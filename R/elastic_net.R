@@ -14,6 +14,9 @@
 #' model <- elastic_net_regression(X, y, alphas = seq(0, 1, by = 0.05), method = 'glmnet')
 #' @export
 elastic_net_regression <- function(X, y) {
+  if(!is.matrix(X)){
+    X <- as.matrix(X)
+  }
   
   # Determine the type of response variable
   family_type <- if (all(y %in% c(0, 1))) "binomial" else "gaussian"

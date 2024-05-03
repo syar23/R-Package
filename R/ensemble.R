@@ -19,42 +19,26 @@
 #' # ensemble_predict(x, y, data)
 #'
 # Ensemble prediction function definition
-ensemble_predict <- function(x, y, data, weights = NULL) {
-
-  # Split data into training and testing sets
-  set.seed(123)  # for reproducibility
-  train_idx <- sample(1:nrow(data), size = floor(0.7 * nrow(data)))
-  test_idx <- setdiff(1:nrow(data), train_idx)
-  x_train <- as.matrix(data[train_idx, -ncol(data)])
-  y_train <- data[train_idx, ncol(data)]
-  x_test <- as.matrix(data[test_idx, -ncol(data)])
-
-  # Models setup
-  models <- list(
-    "RandomForest" = randomForest::randomForest(x_train, y_train, ntree = 100),
-    "ElasticNet" = glmnet::cv.glmnet(x_train, y_train, family = "gaussian")
-  )
-
-  # Collect predictions
-  predictions <- lapply(models, function(model) {
-    if (inherits(model, "randomForest")) {
-      predict(model, x_test)  # Using the generic predict function
-    } else {
-      predict(model, x_test, s = "lambda.min", type = "response")
-    }
-  })
-
-  # Combine predictions
-  combined_predictions <- do.call(cbind, predictions)
-
-  # Apply weights
-  if (!is.null(weights)) {
-    if (length(weights) != length(predictions)) stop("Length of weights must match the number of models.")
-    combined_predictions <- combined_predictions * weights
+ensemble_predict <- function(X, y) {
+  
+  source("linear.R")
+  l.model <- linear_model(X,y)
+  source("elastic_net.R")
+  e.net <- elastic_net_regression(X,y)
+  source("random_forest.R")
+  r.forest <- rf_model(X,y)
+  
+  data.mat <- cbind(x1 = l.model$predicted.value, x2 = e.net$predicted.value, x3 = r.forest$predicted.value)
+  if (all(y %in% c(0, 1))){
+    data.mat <- round(data.mat)
+    y.hat <- round(apply(data.mat, 1, function(x) max(as.numeric(names(which.max(table(x)))))))
+  } else {
+    #find optimal weight by estimating the MSE
+    # mse.values <- c(mean((l.model$predicted.value - y)^2), mean((e.net$predicted.value - y)^2), mean((r.forest$predicted.value - y)^2))
+    # reciprocal.mses <- 1/mse.values
+    # weight <- reciprocal.mses/sum(reciprocal.mses)
+    # y.hat <- weight*t(data.mat)
+    y.hat <- apply(data.mat, 1, mean)
   }
-
-  # Final predictions
-  final_predictions <- rowMeans(combined_predictions)
-
-  return(final_predictions)
+  return(list(ensembled_prediction = y.hat, linear = l.model, elastic.net = e.net, random.forest = r.forest)) #weight = weight,
 }
