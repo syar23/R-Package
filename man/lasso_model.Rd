@@ -4,17 +4,16 @@
 \alias{lasso_model}
 \title{Fit a Lasso regression model using glmnet with cross-validation for lambda selection.}
 \usage{
-lasso_model(X, y, fold_percentage = 0.2)
+lasso_model(X, y)
 }
 \arguments{
-\item{X}{Matrix of predictor variables. Each row represents an observation, and each column represents a predictor.}
+\item{X}{Matrix of predictors. Each row represents an observation, and each column represents a predictor.
+can be a mix of continuous, discrete, and binary predictors.}
 
 \item{y}{Response variable. For binary outcomes, it should be a binary vector (0 or 1). For continuous outcomes, it should be a numeric vector.}
-
-\item{fold_percentage}{Ratio of number of folds to sample size for cross-validation.}
 }
 \value{
-A fitted Lasso regression model object of class "glmnet".
+A list containing the fitted model object and predicted values.
 }
 \description{
 This function fits a Lasso regression model using the glmnet package with cross-validation to select the optimal lambda value. It automatically detects
@@ -24,6 +23,6 @@ the type of response variable (binary or continuous) and adjusts the family para
 # Example usage
 X <- matrix(rnorm(100 * 5), ncol = 5)
 y <- sample(0:1, 100, replace = TRUE)
-lasso_model(X, y, fold_percentage = 0.2)
+lasso_model(X, y)
 
 }

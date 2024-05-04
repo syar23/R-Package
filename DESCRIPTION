@@ -1,19 +1,20 @@
 Package: simpleEnsembleGroup22
-Title: Ensemble Learning with Regression Models
-Version: 0.1.0
-Authors: Sravya Yarlagadda, Hasan Md Moonam, Aman Arya, Eric Seeram
-Maintainer:
-Description: If given a response variable y and matrix of candidate
-predictor/independent variables X (y can be continuous or binary, 
-X can be combination of continuous, discrete, binary predictors), 
-implements following models - linear or logistic, ridge, lasso, elastic net, svm.
-If number of predictors are more than sample size, pre-screening for top K 
-most informative predictors. Bagging and option for ensemble learning with the models.
-Depends:
-Imports:
-  glmnet
-Suggests:
-License: 
+Title: Regression Models and Ensemble learning
+Version: 0.0.0.9000
+Author: person("Sravya Yarlagadda", role = c("aut", "cre", "ctb"))
+            person("Hasan Md Moonam", role = c("aut", "cre", "ctb"))
+            person("Aman Arya", role = c("aut", "cre", "ctb"))
+            person("Eric Seeram", role = c("aut", "cre", "ctb"))
+Maintainer: Sravya Yarlagadda <sravya.yarlagadda@stonybrook.edu>, Hasan Md Moonam <hasanmd.moonam@stonybrook.edu>
+Description: The package provides tools for robust machine learning applications, integrating advanced regression and ensemble techniques to tackle complex predictive modeling tasks.
+Imports: 
+    glmnet (>= 4.1-8),
+    randomForest
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
